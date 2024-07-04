@@ -1,1 +1,2 @@
 "#My Dashboard" 
+"# School Dashboard" 
