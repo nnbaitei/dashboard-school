@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 from dash import Dash, html, dcc
 
 # Load and read the geojson file for Thailand regions.
-italy_url = "https://raw.githubusercontent.com/chingchai/OpenGISData-Thailand/master/provinces.geojson"
-with urllib.request.urlopen(italy_url) as url:
+thai_url = "https://raw.githubusercontent.com/chingchai/OpenGISData-Thailand/master/provinces.geojson"
+with urllib.request.urlopen(thai_url) as url:
     jdata = json.loads(url.read().decode())
 
 fig = go.Figure()
