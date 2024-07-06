@@ -53,39 +53,47 @@ def create_bar_chart(province):
 
 def bar():
     colors = {
-    'bg_female': ['#DF007C'],
-    'bg_male': ['#FD2D00']
+        'bg_female': '#DF007C',
+        'bg_male': '#00C5C8'
     }
     df = pd.read_csv('student.csv')
 
-    provinces = df['schools_province'].unique()
-    df_filtered = df[df['schools_province'].isin(provinces)]
-    num_rows = (len(provinces) + 3) // 4 
-    fig = make_subplots(rows=num_rows, cols=4, subplot_titles=provinces)
+    fig = go.Figure()
 
-    for i, province in enumerate(provinces):
-        row = i // 4 + 1  
-        col = i % 4 + 1  
-        filtered_data = df_filtered[df_filtered['schools_province'] == province]
+    # Add male data
+    fig.add_trace(go.Bar(
+        x=df['schools_province'],
+        y=df['totalmale'],
+        marker_color=colors['bg_male'],
+        text=df['totalmale'],
+        name='Male'
+    ))
 
-        fig.add_trace(px.bar(data_frame=filtered_data, x='schools_province', y='totalmale', 
-                            barmode='group', color_discrete_sequence=colors['bg_male'], text='totalmale').data[0], 
-                    row=row, col=col)
+    # Add female data
+    fig.add_trace(go.Bar(
+        x=df['schools_province'],
+        y=df['totalfemale'],
+        marker_color=colors['bg_female'],
+        text=df['totalfemale'],
+        name='Female'
+    ))
 
-        fig.add_trace(px.bar(data_frame=filtered_data, x='schools_province', y='totalfemale', 
-                            barmode='group', color_discrete_sequence=colors['bg_female'], text='totalfemale').data[0], 
-                    row=row, col=col)
+    # Update layout for combined bar chart
+    fig.update_traces(textposition='outside', textfont_size=14)
     fig.update_layout(
-                    
-                    template='plotly_dark',
-                    plot_bgcolor='rgba(0, 0, 0, 0)',
-                    paper_bgcolor='rgba(0, 0, 0, 0)',
-                    height=7000,
-                    width=1000
-                    )  # ปรับความสูงของกราฟเพื่อให้มองได้ชัดเจน
+        barmode='group',
+        template='plotly_dark',
+        plot_bgcolor='rgba(0, 0, 0, 0)',
+        paper_bgcolor='rgba(0, 0, 0, 0)',
+        height=700,
+        width=1100,
+        xaxis_title='Province',
+        yaxis_title='Total Students',
+        legend_title='Gender',
+        showlegend=True,
+        bargap=0.2,
+    )
     return fig
-
-
 
 def map():
 
@@ -178,11 +186,11 @@ app.layout = html.Div(children=[
                                 )
                             ], style={'paddingTop': '60px'}),
 
-                            html.Label('Overview', style={'font-size': '40px', 'font-weight': 'semi-bold', 'margin-bottom': '10px', 'color': colors['text'], 'opacity': 0.6,}), 
+                            html.Label('Overview', style={'font-size': '40px', 'font-weight': 'semi-bold', 'color': colors['text'], 'opacity': 0.6,}), 
 
                             html.Div(
-                                dcc.Graph(id='example-graph-2', figure=fig_bar),
-                                style={'height':'500px', 'width': 'auto', 'overflow-y':'scroll'}
+                                dcc.Graph(id='example-graph-1', figure=fig_bar),
+                                style={'height':'500px', 'width': 'auto'}
                             )
                         ],
                         style={'display': 'flex', 'flexDirection': 'column', 'gap':'50px'}         
