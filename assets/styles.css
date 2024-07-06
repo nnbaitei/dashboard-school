@@ -1,0 +1,13 @@
+/* assets/styles.css */
+.gradient-text {
+    background: linear-gradient(45deg, #FD2D00, #DF007C);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    font-size: 60px;
+    padding-top: 4%;
+}
+
+.background {
+    background: radial-gradient(circle, #1D1B26, #06191D);
+}

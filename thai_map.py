@@ -50,16 +50,27 @@ def map():
     fig.update_yaxes(showticklabels=False)
     return fig
 
-
-# app = Dash()
-# app.layout = html.Div([
-#     dcc.Graph(figure=fig)
-# ])
-
 if __name__ == '__main__':
+
+    colors = {
+    'background': '#1D1B26',
+    'text': '#FFFFFF'
+    }
+
     fig_map = map()
     app = Dash()
-    app.layout = html.Div([
+    app.layout = html.Div(className='background', children=[
+        html.H1(
+            'Information about students graduating in 2024',
+            className='gradient-text'  # ใช้คลาส CSS ที่กำหนดการไล่สี
+        ),
+
+        html.Div(children='สถิตินักเรียนจบการศึกษา ปี 2567: แสดงตามเพศและจังหวัด', style={
+            'textAlign': 'center',
+            'color': colors['text'],
+            'opacity': 0.6,
+            'font-size': "24px"
+        },),
         dcc.Graph(figure=fig_map)
     ])
     app.run_server()
