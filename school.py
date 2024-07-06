@@ -16,7 +16,6 @@ def map():
     with open(file_path, 'r', encoding='utf-8') as file:
         jdata = json.load(file)
 
-
     fig = go.Figure()
 
     # Loop through each feature in the geojson file
