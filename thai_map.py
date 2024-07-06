@@ -37,7 +37,7 @@ def map():
                     fig.add_scatter(x=x, y=y, mode='lines', line_color='#999999', line_width=1.5, fill='toself', fillcolor='rgba(200, 200, 200, 0.2)', text=text)
 
     fig.update_layout(width=600, 
-                    height=900, 
+                    height=1000, 
                     xaxis_showgrid=False, 
                     yaxis_showgrid=False, 
                     showlegend=False, 
@@ -56,13 +56,14 @@ if __name__ == '__main__':
     'background': '#1D1B26',
     'text': '#FFFFFF'
     }
+    
 
     fig_map = map()
     app = Dash()
-    app.layout = html.Div(className='background', children=[
+    app.layout = html.Div(children=[
         html.H1(
             'Information about students graduating in 2024',
-            className='gradient-text'  # ใช้คลาส CSS ที่กำหนดการไล่สี
+            className='gradient-text' 
         ),
 
         html.Div(children='สถิตินักเรียนจบการศึกษา ปี 2567: แสดงตามเพศและจังหวัด', style={
@@ -71,6 +72,11 @@ if __name__ == '__main__':
             'opacity': 0.6,
             'font-size': "24px"
         },),
-        dcc.Graph(figure=fig_map)
+        html.Div(
+            dcc.Graph(id='example-graph',
+                  figure=fig_map,
+                  )
+        )
+        
     ])
     app.run_server()

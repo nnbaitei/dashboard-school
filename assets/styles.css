@@ -8,6 +8,15 @@
     padding-top: 4%;
 }
 
-.background {
+body {
     background: radial-gradient(circle, #1D1B26, #06191D);
 }
+
+/* assets/styles.css */
+.plotly .modebar {
+    position: absolute !important;
+    top: 205% !important; /* เปลี่ยน top ตามต้องการ */
+    transform: translateY(10%) !important;
+}
+
+
