@@ -118,7 +118,7 @@ def map():
                 total_st = feature['properties']['student']['totalstd']
                 text = f'  {pro_name_th}  <br>  ผู้ชาย: {male_st}  <br>  ผู้หญิง: {female_st}  <br>  รวม: {str(total_st)}  '
                 if pro_name == "Songkhla":  # Check if the province is Songkhla
-                    fig.add_scatter(x=x, y=y, mode='lines', line_color='red', line_width=1.5, fill='toself', fillcolor='rgba(255, 0, 0, 0.2)', text=text)
+                    fig.add_scatter(x=x, y=y, mode='lines', line_color='#DF007C', line_width=1.5, fill='toself', fillcolor='rgba(255, 0, 0, 0.2)', text=text)
                 else:
                     fig.add_scatter(x=x, y=y, mode='lines', line_color='#999999', line_width=1.5, fill='toself', fillcolor='rgba(200, 200, 200, 0.2)', text=text)
 
