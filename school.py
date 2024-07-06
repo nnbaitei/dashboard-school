@@ -6,48 +6,81 @@ from dash import Dash, html, dcc
 import pandas as pd
 from plotly.subplots import make_subplots
 import plotly.express as px
+from dash.dependencies import Input, Output
 
-# Load and read the geojson file for Thailand regions.
-# thai_url = "https://raw.githubusercontent.com/chingchai/OpenGISData-Thailand/master/provinces.geojson"
-# with urllib.request.urlopen(thai_url) as url:
-#     jdata = json.loads(url.read().decode())
+# Function to create bar chart for a given province
+def create_bar_chart(province):
+    colors = {
+    'bg_female': ['#DF007C'],
+    'bg_male': ['#FD2D00'] 
+    }
 
-def bar():
+    # Read data from CSV
     df = pd.read_csv('student.csv')
 
-    # สร้างลิสต์ของจังหวัดที่มีอยู่ในคอลัมน์ 'schools_province'
+    filtered_data = df[df['schools_province'] == province]
+
+    fig = make_subplots(rows=1, cols=1, subplot_titles=[province])
+
+    fig.add_trace(go.Bar(
+        x=filtered_data['schools_province'],
+        y=filtered_data['totalmale'],
+        marker_color=colors['bg_male'],
+        text=filtered_data['totalmale'],
+        name='Male'
+    ), row=1, col=1)
+
+    fig.add_trace(go.Bar(
+        x=filtered_data['schools_province'],
+        y=filtered_data['totalfemale'],
+        marker_color=colors['bg_female'],
+        text=filtered_data['totalfemale'],
+        name='Female'
+    ), row=1, col=1)
+
+    fig.update_traces(textposition='outside', textfont_size=14)  # Place text labels outside the bars
+
+    fig.update_layout(
+        template='plotly_dark',
+        plot_bgcolor='rgba(0, 0, 0, 0)',
+        paper_bgcolor='rgba(0, 0, 0, 0)',
+        height=500,
+        width=700,
+        showlegend=True
+    )
+
+    return fig
+
+def bar():
+    colors = {
+    'bg_female': ['#DF007C'],
+    'bg_male': ['#FD2D00']
+    }
+    df = pd.read_csv('student.csv')
+
     provinces = df['schools_province'].unique()
-
-    # กรองข้อมูลเฉพาะจังหวัดที่มีในลิสต์ provinces
     df_filtered = df[df['schools_province'].isin(provinces)]
-
-    # คำนวณจำนวนแถวที่เหมาะสมต่อคอลัมน์ (หากไม่แน่ใจถึงจำนวนจะใช้)
-    num_rows = (len(provinces) + 3) // 4  # จำนวนแถวที่เหมาะสมต่อคอลัมน์ (4 แถว)
-
-    # สร้างกราฟบาร์โดยใช้ Plotly Express ทั้งหมดใน DataFrame ที่กรองแล้ว
+    num_rows = (len(provinces) + 3) // 4 
     fig = make_subplots(rows=num_rows, cols=4, subplot_titles=provinces)
 
-    # เพิ่มกราฟบาร์แต่ละจังหวัดเป็น subplot
     for i, province in enumerate(provinces):
-        row = i // 4 + 1  # หาแถวที่เหมาะสมสำหรับ subplot
-        col = i % 4 + 1   # หาคอลัมน์ที่เหมาะสมสำหรับ subplot
+        row = i // 4 + 1  
+        col = i % 4 + 1  
         filtered_data = df_filtered[df_filtered['schools_province'] == province]
 
-        # เพิ่มกราฟบาร์ชายและหญิง
         fig.add_trace(px.bar(data_frame=filtered_data, x='schools_province', y='totalmale', 
-                            barmode='group', color_discrete_sequence=['blue'], text='totalmale').data[0], 
+                            barmode='group', color_discrete_sequence=colors['bg_male'], text='totalmale').data[0], 
                     row=row, col=col)
 
         fig.add_trace(px.bar(data_frame=filtered_data, x='schools_province', y='totalfemale', 
-                            barmode='group', color_discrete_sequence=['red'], text='totalfemale').data[0], 
+                            barmode='group', color_discrete_sequence=colors['bg_female'], text='totalfemale').data[0], 
                     row=row, col=col)
-    # กำหนดเลเยอร์และรายละเอียด
     fig.update_layout(
                     
                     template='plotly_dark',
                     plot_bgcolor='rgba(0, 0, 0, 0)',
                     paper_bgcolor='rgba(0, 0, 0, 0)',
-                    height=9000,
+                    height=7000,
                     width=1000
                     )  # ปรับความสูงของกราฟเพื่อให้มองได้ชัดเจน
     return fig
@@ -55,6 +88,7 @@ def bar():
 
 
 def map():
+
     file_path = 'merged_file.json'
 
     # อ่านไฟล์ JSON
@@ -94,47 +128,81 @@ def map():
     fig.update_yaxes(showticklabels=False)
     return fig
 
-if __name__ == '__main__':
-
-    colors = {
+colors = {
     'background': '#1D1B26',
     'text': '#FFFFFF'
     }
     
-    fig_map = map()
-    fig_bar = bar()
-    
-    app = Dash(__name__)
-    app.layout = html.Div(children=[
-        html.H1(
-            'Information about students graduating in 2024',
-            className='gradient-text' 
-        ),
+fig_map = map()
+fig_bar = bar()
 
-        html.Div(children='สถิตินักเรียนจบการศึกษา ปี 2567: แสดงตามเพศและจังหวัด', style={
-            'textAlign': 'center',
-            'color': colors['text'],
-            'opacity': 0.6,
-            'font-size': "24px"
-        },),
-        html.Div(
-            children=[
-                html.Div(
-                    [
-                        html.Div(dcc.Graph(id='example-graph-1', figure=fig_map)
-                                #  className='six columns',
-                                #  style={'width': '0px'}
+# List of provinces
+df = pd.read_csv('student.csv')
+provinces = df['schools_province'].unique()
+default_province = 'สงขลา'
+
+app = Dash(__name__)
+app.layout = html.Div(children=[
+    html.H1(
+        'Information about students graduating in 2024',
+        className='gradient-text' 
+    ),
+
+    # html.Div(children='สถิตินักเรียนจบการศึกษา ปี 2567: แสดงตามเพศและจังหวัด', style={
+    #     'textAlign': 'center',
+    #     'color': colors['text'],
+    #     'opacity': 0.6,
+    #     'font-size': "24px"
+    # },),
+    html.Div(
+        children=[
+            html.Div(
+                [
+                    html.Div(dcc.Graph(id='example-graph-1', figure=fig_map)
+                            #  className='six columns',
+                            #  style={'width': '0px'}
+                            ),
+                    html.Div(
+                        [
+                            html.Div([
+                                html.Label('Select Province', style={'font-size': '40px', 'font-weight': 'semi-bold', 'margin-bottom': '20px', 'color': colors['text'], 'opacity': 0.6,}),
+                                dcc.Dropdown(
+                                    id='province-dropdown',
+                                    options=[{'label': province, 'value': province} for province in provinces],
+                                    value=default_province  # Default value
                                 ),
-                        html.Div(dcc.Graph(id='example-graph-2', figure=fig_bar),
-                                #  className='six columns',
-                                 style={'height':'500px', 'width': 'auto', 'overflow-y':'scroll', 'display':'flex', 'justifyContent': 'flex-end'}
+                                html.Div(
+                                    [
+                                    dcc.Graph(id='province-graph', figure=create_bar_chart(default_province), style={'margin': 'auto'})
+                                    ], style={'display':'flex','justifyContent': 'center', 'alignItems': 'center'}
                                 )
-                    ],
-                    style={'display': 'flex', 'flexDirection': 'row', 'justifyContent': 'center', 'alignItems': 'center'}
-                    # style={'backgroundColor': '#ffffff'}
-                )
-            ]
+                            ], style={'paddingTop': '60px'}),
+
+                            html.Label('Overview', style={'font-size': '40px', 'font-weight': 'semi-bold', 'margin-bottom': '10px', 'color': colors['text'], 'opacity': 0.6,}), 
+
+                            html.Div(
+                                dcc.Graph(id='example-graph-2', figure=fig_bar),
+                                style={'height':'500px', 'width': 'auto', 'overflow-y':'scroll'}
+                            )
+                        ],
+                        style={'display': 'flex', 'flexDirection': 'column', 'gap':'50px'}         
+                    )
+                ],
+                style={'display': 'flex', 'flexDirection': 'row', 'justifyContent': 'center', 'alignItems': 'center'}
+                # style={'backgroundColor': '#ffffff'}
+            )
+        ]
+    )
+])
+
+
+# Callback to update graph based on selected province
+@app.callback(
+    Output('province-graph', 'figure'),
+    [Input('province-dropdown', 'value')]
 )
-        
-    ])
+def update_graph(selected_province):
+    return create_bar_chart(selected_province)
+
+if __name__ == '__main__':
     app.run(debug=True)
