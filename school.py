@@ -3,11 +3,56 @@ import urllib.request
 import numpy as np
 import plotly.graph_objects as go
 from dash import Dash, html, dcc
+import pandas as pd
+from plotly.subplots import make_subplots
+import plotly.express as px
 
 # Load and read the geojson file for Thailand regions.
 # thai_url = "https://raw.githubusercontent.com/chingchai/OpenGISData-Thailand/master/provinces.geojson"
 # with urllib.request.urlopen(thai_url) as url:
 #     jdata = json.loads(url.read().decode())
+
+def bar():
+    df = pd.read_csv('student.csv')
+
+    # สร้างลิสต์ของจังหวัดที่มีอยู่ในคอลัมน์ 'schools_province'
+    provinces = df['schools_province'].unique()
+
+    # กรองข้อมูลเฉพาะจังหวัดที่มีในลิสต์ provinces
+    df_filtered = df[df['schools_province'].isin(provinces)]
+
+    # คำนวณจำนวนแถวที่เหมาะสมต่อคอลัมน์ (หากไม่แน่ใจถึงจำนวนจะใช้)
+    num_rows = (len(provinces) + 3) // 4  # จำนวนแถวที่เหมาะสมต่อคอลัมน์ (4 แถว)
+
+    # สร้างกราฟบาร์โดยใช้ Plotly Express ทั้งหมดใน DataFrame ที่กรองแล้ว
+    fig = make_subplots(rows=num_rows, cols=4, subplot_titles=provinces)
+
+    # เพิ่มกราฟบาร์แต่ละจังหวัดเป็น subplot
+    for i, province in enumerate(provinces):
+        row = i // 4 + 1  # หาแถวที่เหมาะสมสำหรับ subplot
+        col = i % 4 + 1   # หาคอลัมน์ที่เหมาะสมสำหรับ subplot
+        filtered_data = df_filtered[df_filtered['schools_province'] == province]
+
+        # เพิ่มกราฟบาร์ชายและหญิง
+        fig.add_trace(px.bar(data_frame=filtered_data, x='schools_province', y='totalmale', 
+                            barmode='group', color_discrete_sequence=['blue'], text='totalmale').data[0], 
+                    row=row, col=col)
+
+        fig.add_trace(px.bar(data_frame=filtered_data, x='schools_province', y='totalfemale', 
+                            barmode='group', color_discrete_sequence=['red'], text='totalfemale').data[0], 
+                    row=row, col=col)
+    # กำหนดเลเยอร์และรายละเอียด
+    fig.update_layout(
+                    
+                    template='plotly_dark',
+                    plot_bgcolor='rgba(0, 0, 0, 0)',
+                    paper_bgcolor='rgba(0, 0, 0, 0)',
+                    height=9000,
+                    width=1000
+                    )  # ปรับความสูงของกราฟเพื่อให้มองได้ชัดเจน
+    return fig
+
+
 
 def map():
     file_path = 'merged_file.json'
@@ -56,9 +101,10 @@ if __name__ == '__main__':
     'text': '#FFFFFF'
     }
     
-
     fig_map = map()
-    app = Dash()
+    fig_bar = bar()
+    
+    app = Dash(__name__)
     app.layout = html.Div(children=[
         html.H1(
             'Information about students graduating in 2024',
@@ -72,10 +118,23 @@ if __name__ == '__main__':
             'font-size': "24px"
         },),
         html.Div(
-            dcc.Graph(id='example-graph',
-                  figure=fig_map,
-                  )
-        )
+            children=[
+                html.Div(
+                    [
+                        html.Div(dcc.Graph(id='example-graph-1', figure=fig_map)
+                                #  className='six columns',
+                                #  style={'width': '0px'}
+                                ),
+                        html.Div(dcc.Graph(id='example-graph-2', figure=fig_bar),
+                                #  className='six columns',
+                                 style={'height':'500px', 'width': 'auto', 'overflow-y':'scroll', 'display':'flex', 'justifyContent': 'flex-end'}
+                                )
+                    ],
+                    style={'display': 'flex', 'flexDirection': 'row', 'justifyContent': 'center', 'alignItems': 'center'}
+                    # style={'backgroundColor': '#ffffff'}
+                )
+            ]
+)
         
     ])
-    app.run_server()
+    app.run(debug=True)
